@@ -52,7 +52,7 @@ name ; surname ; date_of_birth ; email ; password ; city_from ; country_from ; f
 name ; surname ; date_of_birth ; email ; password ; city_from ; country_from ; friends
 
 Пример значения полей по ключам: \
-"id":1
+"id":1 \
 "name":'Name' \
 "surname":'Surname' \
 "date_of_birth":'2001-01-01' \
