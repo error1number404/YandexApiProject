@@ -25,14 +25,14 @@ api запросы для User: \
 Передача верного api_key по ключу 'api_key' обязательна для всех запросов.
 
 get: \
-—Получить пользователя с определенным id. URL для запроса: http/yl-flask-project.herokuapp.com/api/users/id(int) \
-—Получить всех пользователей. URL для запроса: http/yl-flask-project.herokuapp.com/api/users
+—Получить пользователя с определенным id. URL для запроса: https://yl-flask-project.herokuapp.com/api/users/id(int) \
+—Получить всех пользователей. URL для запроса: https://yl-flask-project.herokuapp.com/api/users
 
 delete: \
-—Удалить пользователя с определенным id. URL для запроса: http/yl-flask-project.herokuapp.com/api/users/id(int)
+—Удалить пользователя с определенным id. URL для запроса: https://yl-flask-project.herokuapp.com/api/users/id(int)
 
 post: \
-—Добавить пользователя. URL для запроса: http/yl-flask-project.herokuapp.com/api/users \
+—Добавить пользователя. URL для запроса: https://yl-flask-project.herokuapp.com/api/users \
 Для данного запроса обязательна передача параметров по ключам: \
 name ; surname ; date_of_birth ; email ; password ; city_from ; country_from ; friends
 
@@ -43,10 +43,10 @@ name ; surname ; date_of_birth ; email ; password ; city_from ; country_from ; f
 "email":'example@domen.com' \
 "password":'password' \
 "city_from":'London' \
-"country_from":'2'(Узнать id стран можно с помощью api запроса к country) \
+"country_from":2(Узнать id стран можно с помощью api запроса к country) \
 "friends":[1, 2, 3]
 
-—Изменить данные пользователя. URL для запроса: http/yl-flask-project.herokuapp.com/api/users \
+—Изменить данные пользователя. URL для запроса: https://yl-flask-project.herokuapp.com/api/users \
 Для данного запроса обязательная передача значения по ключу: id \
 и, как минимум, одного поля из данного списка: \
 name ; surname ; date_of_birth ; email ; password ; city_from ; country_from ; friends
@@ -59,6 +59,6 @@ name ; surname ; date_of_birth ; email ; password ; city_from ; country_from ; f
 "email":'example@domen.com' \
 "password":'password' \
 "city_from":'London' \
-"country_from":'2'(Узнать id стран можно с помощью api запроса к country) \
+"country_from":2(Узнать id стран можно с помощью api запроса к country) \
 "friends":[1, 2, 3]
 
