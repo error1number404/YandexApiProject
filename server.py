@@ -429,6 +429,10 @@ def edit_task(id):
                                current_user.get_friends_list()]
                     form.friend_invited.choices = [(str(friend.id), f'{friend.name} {friend.surname}') for friend in
                                                    friends]
+                if task.participating:
+                    for user in [db_sess.query(User).get(user_id) for user_id in task.get_participates_list()]:
+                        if (str(user.id), f'{user.name} {user.surname}') not in form.friend_invited.choices:
+                            form.friend_invited.choices.append((str(user.id), f'{user.name} {user.surname}'))
                 form.title.data = task.title
                 form.description.data = task.description
                 form.friend_invited.data = task.participating.split(', ')
