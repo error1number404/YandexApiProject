@@ -53,10 +53,10 @@ def main():
     api.add_resource(friend_requests_resources.FriendRequestsListResource, '/api/friend_requests')
     api.add_resource(friend_requests_resources.FriendRequestResource, '/api/friend_requests/<int:friend_request_id>')
     schedule.every().day.at("00:00").do(delete_old_tasks)
-    app.run(port=80, host='127.0.0.1', debug=True)
+    #app.run(port=80, host='127.0.0.1', debug=True)
     #app.run()
-    # port = int(os.environ.get("PORT", 5000))
-    # app.run(host='0.0.0.0', port=port)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
 
 def delete_old_tasks():
     db_sess = db_session.create_session()
