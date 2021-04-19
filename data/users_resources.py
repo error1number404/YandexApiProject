@@ -27,6 +27,15 @@ def abort_if_user_not_found(user_id):
     if not user:
         abort(404, message=f"User {user_id} not found")
 
+def abort_if_users_not_found(users_id):
+    session = db_session.create_session()
+    users_not_found = []
+    for user in [session.query(User).get(user_id) for user_id in users_id]:
+        if not user:
+            users_not_found.append(user.id)
+    if users_not_found:
+        abort(404, message=f"Users: {','.join(users_not_found)} not found")
+
 def abort_if_api_key_is_wrong():
     api_key = api_parser.parse_args()['api_key']
     if api_key != open('data/current_api_key.txt', 'r').readline():
@@ -92,6 +101,7 @@ class UsersListResource(Resource):
             abort(404, message='Wrong date_of_birth format. Use format like that: 2000-01-01')
         if not validate_email(args['email']):
             abort(404, message='Wrong email format. Use format like that: example@domen.com')
+        abort_if_users_not_found(args['friends'])
         user = User(name=args['name'],
                     surname=args['surname'],
                     date_of_birth=datetime.datetime.strptime(args['date_of_birth'], '%Y-%m-%d'),
@@ -130,6 +140,7 @@ class UsersListResource(Resource):
         if not args['friends'] and 'friends' in json_request:
             args['friends'] = []
         if args['friends'] is not None:
+            abort_if_users_not_found(args['friends'])
             for item in [session.query(User).get(friend_id) for friend_id in user.get_friends_list()]:
                 friends = item.get_friends_list()
                 friends.remove(user.id)

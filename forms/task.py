@@ -14,7 +14,7 @@ class TaskForm(FlaskForm):
     description = StringField('Описание')
     type = SelectField("Тип мероприятия", validators=[DataRequired()],choices=[],validate_choice=False)
     country = SelectField("Страна проведения", validators=[DataRequired()], choices=[],validate_choice=False)
-    friend_invited = MultiCheckboxField('Выберите каких друзей ожидаете на мероприятии',choices=[], validate_choice=False)
+    friend_invited = MultiCheckboxField('Друзья/Участники:',choices=[], validate_choice=False)
     address = StringField('Адрес мероприятия', validators=[DataRequired()])
     date = DateTimeField(f"Дата проведения ({open('data/current_time_zone.txt','r',encoding='utf-8').readline()})", validators=[DataRequired()],format='%Y-%m-%dT%H:%M')
     is_private = BooleanField("Приватное мероприятие?")

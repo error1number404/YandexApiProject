@@ -53,10 +53,10 @@ def main():
     api.add_resource(friend_requests_resources.FriendRequestsListResource, '/api/friend_requests')
     api.add_resource(friend_requests_resources.FriendRequestResource, '/api/friend_requests/<int:friend_request_id>')
     schedule.every().day.at("00:00").do(delete_old_tasks)
-    #app.run(port=80, host='127.0.0.1', debug=True)
+    app.run(port=80, host='127.0.0.1', debug=True)
     #app.run()
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    # port = int(os.environ.get("PORT", 5000))
+    # app.run(host='0.0.0.0', port=port)
 
 def delete_old_tasks():
     db_sess = db_session.create_session()
@@ -339,12 +339,13 @@ def index():
                 task.current_user_is_participating = False
             try:
                 members = [db_sess.query(User).get(member_id) for member_id in
-                           task.get_participates_list()] + [task.creator]
+                           task.get_participates_list()+[task.creator_id]]
             except Exception:
                 members = [current_user]
             members = list(map(lambda x: f"{x.name} {x.surname}" if current_user.id != x.id else 'Вы', members))
+            members.insert(0,members.pop(members.index('Вы')))
             if len(members) > 3:
-                members = members[:4] + ['...']
+                members = members[:3] + ['....']
             members = ', '.join(members)
             task.remaining_time = get_remaining_time_str(task.date - datetime.datetime.now())
             task.displayable_information = [

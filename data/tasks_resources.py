@@ -35,6 +35,15 @@ def abort_if_api_key_is_wrong():
     if api_key != open('data/current_api_key.txt', 'r').readline():
         abort(404,message=f"api key is wrong")
 
+def abort_if_users_not_found(users_id):
+    session = db_session.create_session()
+    users_not_found = []
+    for user in [session.query(User).get(user_id) for user_id in users_id]:
+        if not user:
+            users_not_found.append(user.id)
+    if users_not_found:
+        abort(404, message=f"Users: {','.join(users_not_found)} not found")
+
 class TaskResource(Resource):
     def get(self, task_id):
         abort_if_api_key_is_wrong()
@@ -74,6 +83,7 @@ class TasksListResource(Resource):
         if args['creator_id'] in args['participating']:
             abort(404, message='Creator can not be in participating')
         session = db_session.create_session()
+        abort_if_users_not_found(args['participating']+[args['creator_id']])
         task = Task(creator=session.query(User).get(args['creator_id']),
                     creator_id=args['creator_id'],
                     title=args['title'],
@@ -121,6 +131,7 @@ class TasksListResource(Resource):
         if not args['participating'] and 'participating' in json_request:
             args['participating'] = []
         if args['participating'] is not None:
+            abort_if_users_not_found(args['participating'])
             if task.creator_id in args['participating']:
                 abort(404, message='Creator can not be in participating')
             for user in list(map(lambda x: session.query(User).get(x), task.get_participates_list())):
@@ -141,6 +152,7 @@ class TasksListResource(Resource):
             country = session.query(Country).get(args['country'])
             country.tasks.append(task)
         if args['creator_id']:
+            abort_if_users_not_found([args['creator_id']])
             if args['creator_id'] in task.get_participates_list():
                 abort(404, message='Creator can not be in participating')
             cur_creator = session.query(User).get(task.creator_id)
