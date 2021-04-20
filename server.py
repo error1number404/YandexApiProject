@@ -32,14 +32,6 @@ api = Api(app)
 #run_with_ngrok(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
-
-
-def convert_pos_to_spn(upper, lower):
-    upper = list(map(lambda x: float(x), upper.split()))
-    lower = list(map(lambda x: float(x), lower.split()))
-    return [str(abs(upper[0] - lower[0])), str(abs(upper[1] - lower[1]))]
-
-
 def main():
     db_session.global_init("db/plan_maker.db")
     db_sess = db_session.create_session()
