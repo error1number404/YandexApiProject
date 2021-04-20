@@ -1,4 +1,5 @@
 import requests
+from .convert_pos_to_spn import convert_pos_to_spn
 def get_map_picture(id,address):
     geocoder_api_server = "http://geocode-maps.yandex.ru/1.x/"
 
