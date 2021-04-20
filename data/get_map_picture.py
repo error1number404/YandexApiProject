@@ -1,5 +1,6 @@
 import requests
 from .convert_pos_to_spn import convert_pos_to_spn
+
 def get_map_picture(id,address):
     geocoder_api_server = "http://geocode-maps.yandex.ru/1.x/"
 
@@ -15,7 +16,8 @@ def get_map_picture(id,address):
     map_params = {
         "ll": address_ll,
         "spn": ",".join(convert_pos_to_spn(toponym['boundedBy']['Envelope']['lowerCorner'],toponym['boundedBy']['Envelope']['upperCorner'])),
-        "l": "map"
+        "l": "map",
+        'pt':f"{','.join(toponym['Point']['pos'].split())},pm2dgl"
     }
     map_api_server = "http://static-maps.yandex.ru/1.x/"
     response = requests.get(map_api_server, params=map_params)
