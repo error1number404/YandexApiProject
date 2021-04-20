@@ -14,12 +14,12 @@ api_parser.add_argument('api_key', required=True)
 parser = reqparse.RequestParser()
 parser.add_argument('id', type=int)
 parser.add_argument('creator_id', type=int)
-parser.add_argument('title')
+parser.add_argument('title', type=str)
 parser.add_argument('type', type=int)
-parser.add_argument('description')
+parser.add_argument('description', type=str)
 parser.add_argument('participating',type=int, nullable=False, action='append')
-parser.add_argument('date')
-parser.add_argument('address')
+parser.add_argument('date', type=str)
+parser.add_argument('address', type=str)
 parser.add_argument('country', type=int)
 parser.add_argument('is_private', type=bool)
 parser.add_argument('is_address_displayed', type=bool)
@@ -30,6 +30,18 @@ def abort_if_task_not_found(task_id):
     if not task:
         abort(404, message=f"Task {task_id} not found")
 
+def abort_if_country_not_found(country_id):
+    session = db_session.create_session()
+    country = session.query(Country).get(country_id)
+    if not country:
+        abort(404, message=f"Country {country_id} not found")
+
+def abort_if_type_not_found(type_id):
+    session = db_session.create_session()
+    type = session.query(Type).get(type_id)
+    if not type:
+        abort(404, message=f"Type {type_id} not found")
+
 def abort_if_api_key_is_wrong():
     api_key = api_parser.parse_args()['api_key']
     if api_key != open('data/current_api_key.txt', 'r').readline():
@@ -38,9 +50,9 @@ def abort_if_api_key_is_wrong():
 def abort_if_users_not_found(users_id):
     session = db_session.create_session()
     users_not_found = []
-    for user in [session.query(User).get(user_id) for user_id in users_id]:
-        if not user:
-            users_not_found.append(user.id)
+    for user in [(str(user_id), session.query(User).get(user_id)) for user_id in users_id]:
+        if not user[1]:
+            users_not_found.append(user[0])
     if users_not_found:
         abort(404, message=f"Users: {','.join(users_not_found)} not found")
 
@@ -83,7 +95,8 @@ class TasksListResource(Resource):
         if args['creator_id'] in args['participating']:
             abort(404, message='Creator can not be in participating')
         session = db_session.create_session()
-        abort_if_users_not_found(args['participating']+[args['creator_id']])
+        abort_if_country_not_found(args['country'])
+        abort_if_type_not_found(args['type'])
         task = Task(creator=session.query(User).get(args['creator_id']),
                     creator_id=args['creator_id'],
                     title=args['title'],
@@ -96,6 +109,7 @@ class TasksListResource(Resource):
                     is_address_displayed=args['is_address_displayed'])
         if not args['participating'] and 'participating' in json_request:
             args['participating'] = []
+        abort_if_users_not_found(args['participating'] + [args['creator_id']])
         task.set_participates(args['participating'])
         session.add(task)
         session.commit()
@@ -140,12 +154,14 @@ class TasksListResource(Resource):
             for user in list(map(lambda x: session.query(User).get(x), args['participating'])):
                 user.tasks.append(task)
         if args['type']:
+            abort_if_type_not_found(args['type'])
             type = session.query(Type).get(args['type'])
             type.tasks.remove(task)
             task.type = args['type']
             type = session.query(Type).get(args['type'])
             type.tasks.append(task)
         if args['country']:
+            abort_if_country_not_found(args['country'])
             country = session.query(Country).get(args['country'])
             country.tasks.remove(task)
             task.country = args['country']

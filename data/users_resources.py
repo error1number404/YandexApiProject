@@ -3,6 +3,7 @@ import datetime
 from flask import jsonify,request
 from flask_restful import reqparse, abort,  Resource
 from . import db_session
+from .countries import Country
 from .tasks import Task
 from .friend_requests import FriendRequest
 from validate_email import validate_email
@@ -12,12 +13,12 @@ api_parser.add_argument('api_key', required=True)
 
 parser = reqparse.RequestParser()
 parser.add_argument('id', type=int)
-parser.add_argument('surname')
-parser.add_argument('name')
-parser.add_argument('date_of_birth')
-parser.add_argument('password')
-parser.add_argument('email')
-parser.add_argument('city_from')
+parser.add_argument('surname', type=str)
+parser.add_argument('name', type=str)
+parser.add_argument('date_of_birth', type=str)
+parser.add_argument('password', type=str)
+parser.add_argument('email', type=str)
+parser.add_argument('city_from', type=str)
 parser.add_argument('country_from',type=int)
 parser.add_argument('friends',type=int, action='append')
 
@@ -27,12 +28,18 @@ def abort_if_user_not_found(user_id):
     if not user:
         abort(404, message=f"User {user_id} not found")
 
+def abort_if_country_not_found(country_id):
+    session = db_session.create_session()
+    country = session.query(Country).get(country_id)
+    if not country:
+        abort(404, message=f"Country {country_id} not found")
+
 def abort_if_users_not_found(users_id):
     session = db_session.create_session()
     users_not_found = []
-    for user in [session.query(User).get(user_id) for user_id in users_id]:
-        if not user:
-            users_not_found.append(user.id)
+    for user in [(str(user_id),session.query(User).get(user_id)) for user_id in users_id]:
+        if not user[1]:
+            users_not_found.append(user[0])
     if users_not_found:
         abort(404, message=f"Users: {','.join(users_not_found)} not found")
 
@@ -101,7 +108,7 @@ class UsersListResource(Resource):
             abort(404, message='Wrong date_of_birth format. Use format like that: 2000-01-01')
         if not validate_email(args['email']):
             abort(404, message='Wrong email format. Use format like that: example@domen.com')
-        abort_if_users_not_found(args['friends'])
+        abort_if_country_not_found(args['country_from'])
         user = User(name=args['name'],
                     surname=args['surname'],
                     date_of_birth=datetime.datetime.strptime(args['date_of_birth'], '%Y-%m-%d'),
@@ -110,6 +117,7 @@ class UsersListResource(Resource):
                     country_from=args['country_from'])
         if not args['friends'] and 'friends' in json_request:
             args['friends'] = []
+        abort_if_users_not_found(args['friends'])
         user.set_friends(args['friends'])
         user.set_password(args['password'])
         session.add(user)
@@ -161,6 +169,7 @@ class UsersListResource(Resource):
         if args['city_from']:
             user.city_from = args['city_from']
         if args['country_from']:
+            abort_if_country_not_found(args['country_from'])
             user.country_from = args['country_from']
         if args['password']:
             user.set_password(args['password'])

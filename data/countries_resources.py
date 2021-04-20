@@ -9,7 +9,7 @@ api_parser.add_argument('api_key', required=True)
 
 parser = reqparse.RequestParser()
 parser.add_argument('id', type=int)
-parser.add_argument('name',required=True)
+parser.add_argument('name',required=True, type=str)
 
 def abort_if_country_not_found(country_id):
     session = db_session.create_session()

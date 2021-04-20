@@ -8,7 +8,7 @@ api_parser.add_argument('api_key', required=True)
 
 parser = reqparse.RequestParser()
 parser.add_argument('id', type=int)
-parser.add_argument('title',required=True)
+parser.add_argument('title',required=True, type=str)
 
 def abort_if_type_not_found(type_id):
     session = db_session.create_session()

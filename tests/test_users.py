@@ -67,11 +67,41 @@ print(post('http://localhost:80/api/users',json={'api_key':cur_api_key,
                                                  'password':'password',
                                                  'city_from':'Нижний Новгород',
                                                  'country_from':180,
+                                                 'friends':[99999999999,9995454]}).json()) # несуществующий id в друзьях
+print(post('http://localhost:80/api/users',json={'api_key':cur_api_key,
+                                                 'name':'Алексей',
+                                                 'surname':'Шишкин',
+                                                 'date_of_birth':'2002-10-17',
+                                                 'email':'aa@gmail.com',
+                                                 'password':'password',
+                                                 'city_from':'Нижний Новгород',
+                                                 'country_from':'aaaaa',
+                                                 'friends':[]}).json()) # передан неверный формат для поля country_from
+print(post('http://localhost:80/api/users',json={'api_key':cur_api_key,
+                                                 'name':'Алексей',
+                                                 'surname':'Шишкин',
+                                                 'date_of_birth':'2002-10-17',
+                                                 'email':'aa@gmail.com',
+                                                 'password':'password',
+                                                 'city_from':'Нижний Новгород',
+                                                 'country_from':18888880,
+                                                 'friends':[]}).json()) # несуществующая страна передана
+print(post('http://localhost:80/api/users',json={'api_key':cur_api_key,
+                                                 'name':'Алексей',
+                                                 'surname':'Шишкин',
+                                                 'date_of_birth':'2002-10-17',
+                                                 'email':'aa@gmail.com',
+                                                 'password':'password',
+                                                 'city_from':'Нижний Новгород',
+                                                 'country_from':180,
                                                  'friends':[]}).json()) # все верно
 print(patch('http://localhost:80/api/users',json={'api_key':cur_api_key,
                                                  'friends':[2]}).json()) # нет id
 print(patch('http://localhost:80/api/users',json={'api_key':cur_api_key,
                                                  'id':1}).json()) # нет полей для редактирования
+print(patch('http://localhost:80/api/users',json={'api_key':cur_api_key,
+                                                 'id':11212132321,
+                                                 'friends':[2]}).json()) # несуществующий id для редактирования
 print(patch('http://localhost:80/api/users',json={'api_key':cur_api_key,
                                                  'id':1,
                                                  'friends':[2]}).json()) # все верно

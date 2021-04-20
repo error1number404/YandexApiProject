@@ -45,6 +45,9 @@ print(post('http://localhost:80/api/friend_requests',json={'api_key':cur_api_key
                                                  'sended_by':1}).json()) # переданы не все поля на создание
 print(post('http://localhost:80/api/friend_requests',json={'api_key':cur_api_key,
                                                  'sended_by':1,
+                                                 'received_by':'aaaaaa'}).json()) # неверный формат поля
+print(post('http://localhost:80/api/friend_requests',json={'api_key':cur_api_key,
+                                                 'sended_by':1,
                                                  'received_by':2}).json()) # все верно
 print(post('http://localhost:80/api/friend_requests',json={'api_key':cur_api_key,
                                                  'sended_by':1,

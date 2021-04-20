@@ -5,6 +5,7 @@ from werkzeug.exceptions import abort
 import requests
 import schedule
 import datetime
+import tzlocal
 from requests import get, post, delete
 from data import db_session
 from data.users import User
@@ -42,6 +43,9 @@ def convert_pos_to_spn(upper, lower):
 def main():
     db_session.global_init("db/plan_maker.db")
     db_sess = db_session.create_session()
+    with open('data/current_time_zone.txt','w') as file:
+        file.write(f'UTC: {datetime.datetime.now(tzlocal.get_localzone()).tzname()}')
+        file.close()
     api.add_resource(tasks_resources.TasksListResource, '/api/tasks')
     api.add_resource(tasks_resources.TaskResource, '/api/tasks/<int:task_id>')
     api.add_resource(users_resources.UsersListResource, '/api/users')
@@ -53,10 +57,10 @@ def main():
     api.add_resource(friend_requests_resources.FriendRequestsListResource, '/api/friend_requests')
     api.add_resource(friend_requests_resources.FriendRequestResource, '/api/friend_requests/<int:friend_request_id>')
     schedule.every().day.at("00:00").do(delete_old_tasks)
-    #app.run(port=80, host='127.0.0.1', debug=True)
+    app.run(port=80, host='127.0.0.1', debug=True)
     #app.run()
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    # port = int(os.environ.get("PORT", 5000))
+    # app.run(host='0.0.0.0', port=port)
 
 def delete_old_tasks():
     db_sess = db_session.create_session()
@@ -159,26 +163,17 @@ def profile_opened_tasks(id):
             task.current_user_is_participating = True
         else:
             task.current_user_is_participating = False
-        try:
-            members = [db_sess.query(User).get(member_id) for member_id in
-                       task.get_participates_list()] + [task.creator]
-        except Exception:
-            members = [current_user]
-        members = list(map(lambda x: f"{x.name} {x.surname}" if current_user.id != x.id else 'Вы', members))
-        if len(members) > 3:
-            members = members[:4] + ['...']
-        members = ', '.join(members)
         task.remaining_time = get_remaining_time_str(task.date - datetime.datetime.now())
         task.displayable_information = [
             f"Страна: {db_sess.query(Country).get(task.country).name}",
-            f"Адрес: {task.address}", f"Участники: {members}"]
+            f"Адрес: {task.address}"]
     return render_template('profile_opened_tasks.html', required_css=['profile'], user=user, tasks=tasks,title='Открытые мероприятия')
 @app.route('/profile_friend_requests', methods=['GET', 'POST'])
 @login_required
 def profile_friend_requests():
     picture_file_name_list = os.listdir('static/img')
     db_sess = db_session.create_session()
-    user = current_user
+    user = db_sess.query(User).get(current_user.id)
     if f'{user.id}_profile_picture.png' in picture_file_name_list:
         user.profile_picture_finded = True
     else:
@@ -227,17 +222,17 @@ def profile_find_friends():
     user_list = []
     picture_file_name_list = os.listdir('static/img')
     db_sess = db_session.create_session()
-    user = current_user
+    user = db_sess.query(User).get(current_user.id)
     if f'{user.id}_profile_picture.png' in picture_file_name_list:
         user.profile_picture_finded = True
     else:
         user.profile_picture_finded = False
     form = FriendRequestForm()
     if request.method == "GET":
-        if user != current_user:
+        if user.id != current_user.id:
             abort(404)
     if form.validate_on_submit():
-        if user == current_user:
+        if user.id == current_user.id:
             user_list = list(map(lambda x: (x,f'{x.name} {x.surname}'),db_sess.query(User).all()))
             if user_list:
                 friend_list = current_user.get_friends_list()
@@ -265,7 +260,7 @@ def profile_edit(id):
         user.profile_picture_finded = False
     form = GetPictureForm()
     if request.method == "GET":
-        if user == current_user:
+        if user.id == current_user.id:
             form.name.data = user.name
             form.surname.data = user.surname
             form.city_from.data = user.city_from
@@ -275,7 +270,7 @@ def profile_edit(id):
         else:
             abort(404)
     if form.validate_on_submit():
-        if user == current_user:
+        if user.id == current_user.id:
             user.name = form.name.data
             user.surname = form.surname.data
             user.city_from = form.city_from.data
@@ -337,11 +332,8 @@ def index():
                 task.current_user_is_participating = True
             else:
                 task.current_user_is_participating = False
-            try:
-                members = [db_sess.query(User).get(member_id) for member_id in
-                           task.get_participates_list()+[task.creator_id]]
-            except Exception:
-                members = [current_user]
+            members = [db_sess.query(User).get(member_id) for member_id in
+                       task.get_participates_list()+[task.creator_id]]
             members = list(map(lambda x: f"{x.name} {x.surname}" if current_user.id != x.id else 'Вы', members))
             members.insert(0,members.pop(members.index('Вы')))
             if len(members) > 3:
