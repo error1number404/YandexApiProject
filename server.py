@@ -32,6 +32,7 @@ api = Api(app)
 #run_with_ngrok(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
+
 def main():
     db_session.global_init("db/plan_maker.db")
     db_sess = db_session.create_session()
@@ -93,6 +94,7 @@ def task_info(id):
             task.current_user_is_participating = True
         else:
             task.current_user_is_participating = False
+        task.time_offset = open('data/current_time_zone.txt','r',encoding='utf-8').readline()
         return render_template('task_info.html', task=task,members=members, required_css=['task_info'],title=task.title)
     else:
         abort(404)

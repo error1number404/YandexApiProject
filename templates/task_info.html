@@ -11,7 +11,7 @@
     <li class="list-group-item"><p>Тип мероприятия: {{task.type_name}}</p></li>
     <li class="list-group-item"><p>Страна проведения: {{task.country_name}}</p></li>
     <li class="list-group-item">{%if task.is_address_displayed%}<a class='btn-outline-secondary' href='https://yandex.ru/maps/?mode=search&text={{task.address}}' target="_blank">Адрес: {{task.address}}<a/> {%else%}<p>Адрес: {{task.address}}</p>{%endif%}</li>
-    <li class="list-group-item"><p>Дата: {{task.date}}</p>
+    <li class="list-group-item"><p>Дата ({{task.time_offset}}): {{task.date}}</p>
     <li class="list-group-item"><p>До начала: {{task.remaining_time}}</p>
   </ul>
   <div class="card-body">
