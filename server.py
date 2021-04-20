@@ -95,7 +95,7 @@ def task_info(id):
             task.current_user_is_participating = True
         else:
             task.current_user_is_participating = False
-        task.time_offset = open('data/current_time_zone.txt','r',encoding='utf-8').readline()
+        task.time_offset = datetime.datetime.now(tzlocal.get_localzone()).tzname()
         return render_template('task_info.html', task=task,members=members, required_css=['task_info'],title=task.title)
     else:
         abort(404)
