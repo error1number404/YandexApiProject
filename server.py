@@ -26,6 +26,10 @@ from flask_login import LoginManager, login_user, login_required, logout_user, c
 from flask_restful import reqparse, abort, Api, Resource
 from data.edit_profile_picture import edit_profile_picture
 from flask_ngrok import run_with_ngrok
+
+with open('data/current_time_zone.txt', 'w') as file:
+    file.write(f'UTC: {datetime.datetime.now(tzlocal.get_localzone()).tzname()}')
+    file.close()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 api = Api(app)
@@ -36,9 +40,6 @@ login_manager.init_app(app)
 def main():
     db_session.global_init("db/plan_maker.db")
     db_sess = db_session.create_session()
-    with open('data/current_time_zone.txt','w') as file:
-        file.write(f'UTC: {datetime.datetime.now(tzlocal.get_localzone()).tzname()}')
-        file.close()
     api.add_resource(tasks_resources.TasksListResource, '/api/tasks')
     api.add_resource(tasks_resources.TaskResource, '/api/tasks/<int:task_id>')
     api.add_resource(users_resources.UsersListResource, '/api/users')
