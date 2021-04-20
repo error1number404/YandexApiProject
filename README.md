@@ -13,7 +13,7 @@ User с полями: \
 —hashed_password(string) хешированный пароль\
 —city_from(string) город проживания\
 —country_from(int) id страны проживания\
-—friends(string) id пользователей(друзей) запятую с пробелом
+—friends(string) id пользователей(друзей) через запятую с пробелом
 
 Скрытые поля: \
 —tasks(list), хранит сущности класса Task, добавление сущности изменяет таблицу task_to_user \
