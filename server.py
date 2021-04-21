@@ -324,10 +324,7 @@ def index():
                 elif form.search_item.data  == '2':
                     tasks = list(filter(lambda x: form.search_line.data.lower() in x.description.lower(), tasks))
         for task in tasks:
-            if task.participating and current_user.id in task.get_participates_list():
-                task.current_user_is_participating = True
-            else:
-                task.current_user_is_participating = False
+            task.current_user_is_participating = current_user.id in task.get_participates_list()
             members = [db_sess.query(User).get(member_id) for member_id in
                        task.get_participates_list()+[task.creator_id]]
             members = list(map(lambda x: f"{x.name} {x.surname}" if current_user.id != x.id else 'Вы', members))
@@ -349,7 +346,7 @@ def index():
 @login_required
 def public():
     db_sess = db_session.create_session()
-    tasks = db_sess.query(Task).filter(Task.is_private == 0)
+    tasks = db_sess.query(Task).filter(Task.is_private == False).all()
     form = TasksSearchForm()
     form.country.choices += [(country.id, country.name) for country in db_sess.query(Country).all()]
     form.type.choices += [(types.id, types.title) for types in db_sess.query(Type).all()]
@@ -367,10 +364,7 @@ def public():
             elif form.search_item.data == '2':
                 tasks = list(filter(lambda x: form.search_line.data.lower() in x.description.lower(), tasks))
     for task in tasks:
-        if task.participating and current_user.id in task.get_participates_list():
-            task.current_user_is_participating = True
-        else:
-            task.current_user_is_participating = False
+        task.current_user_is_participating = current_user.id in task.get_participates_list()
         task.remaining_time = get_remaining_time_str(task.date - datetime.datetime.now())
         task.displayable_information = [
             f"Страна: {db_sess.query(Country).get(task.country).name}",
