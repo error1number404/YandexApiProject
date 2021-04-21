@@ -161,6 +161,7 @@ def profile_opened_tasks(id):
         task.remaining_time = get_remaining_time_str(task.date - datetime.datetime.now())
         task.displayable_information = [
             f"Страна: {db_sess.query(Country).get(task.country).name}",
+            f"Тип: {db_sess.query(Type).get(task.type).title}",
             f"Адрес: {task.address}"]
     return render_template('profile_opened_tasks.html', required_css=['profile'], user=user, tasks=tasks,title='Открытые мероприятия')
 @app.route('/profile_friend_requests', methods=['GET', 'POST'])
@@ -337,6 +338,7 @@ def index():
             task.remaining_time = get_remaining_time_str(task.date - datetime.datetime.now())
             task.displayable_information = [
                 f"Страна: {db_sess.query(Country).get(task.country).name}",
+                f"Тип: {db_sess.query(Type).get(task.type).title}",
                 f"Адрес: {task.address}", f"Участники: {members}"]
         return render_template('index.html', tasks=tasks, type='private',form=form,title='Личные мероприятия')
     else:
@@ -372,6 +374,7 @@ def public():
         task.remaining_time = get_remaining_time_str(task.date - datetime.datetime.now())
         task.displayable_information = [
             f"Страна: {db_sess.query(Country).get(task.country).name}",
+            f"Тип: {db_sess.query(Type).get(task.type).title}",
             f"Адрес: {task.address}"]
     return render_template('index.html', tasks=tasks, type='public',form=form,title='Публичные мероприятия')
 
