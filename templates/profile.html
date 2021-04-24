@@ -9,9 +9,11 @@
             <div class="profile-header-img mb-4">
                 <img {%if user.profile_picture_finded %} src="/static/img/{{user.id}}_profile_picture.png" {%else%} src="/static/img/standart_profile_picture.png" {%endif%} class="mb-4" alt="" />
             </div>
-
             <div class="profile-header-info">
                 <h4 class="m-t-sm">{{user.name}} {{user.surname}}</h4>
+                {%if user.profile_picture_finded %}
+                <a class="btn btn-sm btn-outline-danger" href="/delete_profile_picture">Удалить фотографию профиля </a>
+                {%endif%}
             </div>
         </div>
 
