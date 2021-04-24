@@ -56,7 +56,7 @@ def main():
 def delete_old_tasks():
     db_sess = db_session.create_session()
     tasks = db_sess.query(Task).all()
-    tasks = list(filter(lambda x: x.date - datetime.datetime.now(tz=pytz.timezone('Etc/GMT-3')) < -604800,tasks))
+    tasks = list(filter(lambda x: x.date - datetime.datetime.strptime(datetime.datetime.now(tz=pytz.timezone('Etc/GMT-3')).strftime('%Y-%m-%dT%H:%M'),'%Y-%m-%dT%H:%M') < -604800,tasks))
     for item in tasks:
         db_sess.delete(item)
     db_sess.commit()
@@ -68,7 +68,7 @@ def not_found(error):
 @app.route('/delete_profile_picture')
 @login_required
 def delete_profile_picture():
-    if f'static/img/{current_user.id}_profile_picture.png' in os.listdir('static/img'):
+    if f'{current_user.id}_profile_picture.png' in os.listdir('static/img'):
         os.remove(f'static/img/{current_user.id}_profile_picture.png')
         return redirect(request.referrer)
     else:
@@ -95,7 +95,7 @@ def task_info(id):
         task.type_name = db_sess.query(Type).get(task.type).title
         task.country_name = db_sess.query(Country).get(task.country).name
         members = [task.creator]+[db_sess.query(User).get(member_id) for member_id in task.get_participates_list()]
-        task.remaining_time = get_remaining_time_str(task.date - datetime.datetime.now(tz=pytz.timezone('Etc/GMT-3')))
+        task.remaining_time = get_remaining_time_str(task.date - datetime.datetime.strptime(datetime.datetime.now(tz=pytz.timezone('Etc/GMT-3')).strftime('%Y-%m-%dT%H:%M'),'%Y-%m-%dT%H:%M'))
         if task.participating and current_user.id in task.get_participates_list():
             task.current_user_is_participating = True
         else:
@@ -162,7 +162,7 @@ def profile_opened_tasks(id):
             task.current_user_is_participating = True
         else:
             task.current_user_is_participating = False
-        task.remaining_time = get_remaining_time_str(task.date - datetime.datetime.now(tz=pytz.timezone('Etc/GMT-3')))
+        task.remaining_time = get_remaining_time_str(task.date - datetime.datetime.strptime(datetime.datetime.now(tz=pytz.timezone('Etc/GMT-3')).strftime('%Y-%m-%dT%H:%M'),'%Y-%m-%dT%H:%M'))
         task.displayable_information = [
             f"Страна: {db_sess.query(Country).get(task.country).name}",
             f"Тип: {db_sess.query(Type).get(task.type).title}",
@@ -336,7 +336,7 @@ def index():
             if len(members) > 3:
                 members = members[:3] + ['....']
             members = ', '.join(members)
-            task.remaining_time = get_remaining_time_str(task.date - datetime.datetime.now(tz=pytz.timezone('Etc/GMT-3')))
+            task.remaining_time = get_remaining_time_str(task.date - datetime.datetime.strptime(datetime.datetime.now(tz=pytz.timezone('Etc/GMT-3')).strftime('%Y-%m-%dT%H:%M'),'%Y-%m-%dT%H:%M'))
             task.displayable_information = [
                 f"Страна: {db_sess.query(Country).get(task.country).name}",
                 f"Тип: {db_sess.query(Type).get(task.type).title}",
@@ -369,7 +369,7 @@ def public():
                 tasks = list(filter(lambda x: form.search_line.data.lower() in x.description.lower(), tasks))
     for task in tasks:
         task.current_user_is_participating = current_user.id in task.get_participates_list()
-        task.remaining_time = get_remaining_time_str(task.date - datetime.datetime.now(tz=pytz.timezone('Etc/GMT-3')))
+        task.remaining_time = get_remaining_time_str(task.date - datetime.datetime.strptime(datetime.datetime.now(tz=pytz.timezone('Etc/GMT-3')).strftime('%Y-%m-%dT%H:%M'),'%Y-%m-%dT%H:%M'))
         task.displayable_information = [
             f"Страна: {db_sess.query(Country).get(task.country).name}",
             f"Тип: {db_sess.query(Type).get(task.type).title}",
