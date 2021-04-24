@@ -26,10 +26,7 @@ from flask_login import LoginManager, login_user, login_required, logout_user, c
 from flask_restful import reqparse, abort, Api, Resource
 from data.edit_profile_picture import edit_profile_picture
 from flask_ngrok import run_with_ngrok
-
-with open('data/current_time_zone.txt', 'w') as file:
-    file.write(f'UTC: {datetime.datetime.now(tzlocal.get_localzone()).tzname()}')
-    file.close()
+import pytz
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 api = Api(app)
@@ -52,14 +49,14 @@ def main():
     api.add_resource(friend_requests_resources.FriendRequestResource, '/api/friend_requests/<int:friend_request_id>')
     schedule.every().day.at("00:00").do(delete_old_tasks)
     # app.run(port=80, host='127.0.0.1', debug=True)
-    #app.run()
+    # app.run()
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
 
 def delete_old_tasks():
     db_sess = db_session.create_session()
     tasks = db_sess.query(Task).all()
-    tasks = list(filter(lambda x: x.date - datetime.datetime.now() < -604800,tasks))
+    tasks = list(filter(lambda x: x.date - datetime.datetime.now(tz=pytz.timezone('Etc/GMT-3')) < -604800,tasks))
     for item in tasks:
         db_sess.delete(item)
     db_sess.commit()
@@ -68,6 +65,14 @@ def delete_old_tasks():
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
 
+@app.route('/delete_profile_picture')
+@login_required
+def delete_profile_picture():
+    if f'static/img/{current_user.id}_profile_picture.png' in os.listdir('static/img'):
+        os.remove(f'static/img/{current_user.id}_profile_picture.png')
+        return redirect(request.referrer)
+    else:
+        abort(404)
 @app.route('/task_join/<int:id>')
 @login_required
 def task_join(id):
@@ -90,12 +95,11 @@ def task_info(id):
         task.type_name = db_sess.query(Type).get(task.type).title
         task.country_name = db_sess.query(Country).get(task.country).name
         members = [task.creator]+[db_sess.query(User).get(member_id) for member_id in task.get_participates_list()]
-        task.remaining_time = get_remaining_time_str(task.date - datetime.datetime.now())
+        task.remaining_time = get_remaining_time_str(task.date - datetime.datetime.now(tz=pytz.timezone('Etc/GMT-3')))
         if task.participating and current_user.id in task.get_participates_list():
             task.current_user_is_participating = True
         else:
             task.current_user_is_participating = False
-        task.time_offset = datetime.datetime.now(tzlocal.get_localzone()).tzname()
         return render_template('task_info.html', task=task,members=members, required_css=['task_info'],title=task.title)
     else:
         abort(404)
@@ -158,7 +162,7 @@ def profile_opened_tasks(id):
             task.current_user_is_participating = True
         else:
             task.current_user_is_participating = False
-        task.remaining_time = get_remaining_time_str(task.date - datetime.datetime.now())
+        task.remaining_time = get_remaining_time_str(task.date - datetime.datetime.now(tz=pytz.timezone('Etc/GMT-3')))
         task.displayable_information = [
             f"Страна: {db_sess.query(Country).get(task.country).name}",
             f"Тип: {db_sess.query(Type).get(task.type).title}",
@@ -332,7 +336,7 @@ def index():
             if len(members) > 3:
                 members = members[:3] + ['....']
             members = ', '.join(members)
-            task.remaining_time = get_remaining_time_str(task.date - datetime.datetime.now())
+            task.remaining_time = get_remaining_time_str(task.date - datetime.datetime.now(tz=pytz.timezone('Etc/GMT-3')))
             task.displayable_information = [
                 f"Страна: {db_sess.query(Country).get(task.country).name}",
                 f"Тип: {db_sess.query(Type).get(task.type).title}",
@@ -365,7 +369,7 @@ def public():
                 tasks = list(filter(lambda x: form.search_line.data.lower() in x.description.lower(), tasks))
     for task in tasks:
         task.current_user_is_participating = current_user.id in task.get_participates_list()
-        task.remaining_time = get_remaining_time_str(task.date - datetime.datetime.now())
+        task.remaining_time = get_remaining_time_str(task.date - datetime.datetime.now(tz=pytz.timezone('Etc/GMT-3')))
         task.displayable_information = [
             f"Страна: {db_sess.query(Country).get(task.country).name}",
             f"Тип: {db_sess.query(Type).get(task.type).title}",

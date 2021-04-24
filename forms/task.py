@@ -19,7 +19,7 @@ class TaskForm(FlaskForm):
     country = SelectField("Страна проведения", validators=[DataRequired()], choices=[],validate_choice=False)
     friend_invited = MultiCheckboxField('Друзья/Участники:',choices=[], validate_choice=False)
     address = StringField('Адрес мероприятия', validators=[DataRequired()])
-    date = DateTimeField(f"Дата проведения ({datetime.datetime.now(tzlocal.get_localzone()).tzname()})", validators=[DataRequired()],format='%Y-%m-%dT%H:%M')
+    date = DateTimeField(f"Дата проведения(МСК)", validators=[DataRequired()],format='%Y-%m-%dT%H:%M')
     is_private = BooleanField("Приватное мероприятие?")
     is_address_displayed = BooleanField("Добавить отображение адреса на карте?")
     submit = SubmitField('Сохранить')
